@@ -3,6 +3,7 @@ const express = require('express');
 const { exec } = require('child_process');
 const fs = require('fs');
 const os = require('os')
+const sysinfo = require('systeminformation')
 
 
 
@@ -33,7 +34,34 @@ app.get('/meminfo', (req, res) => {
   )
 });
 
+// Define commands as Object literal
+const cmds = {
+      cpu: (res) => {
+        sysinfo.cpu()
+        .then(data => res.send(data))
+        .catch(error => console.error(error)) 
+      },
+      memory: 'memory',
+      default: () => res.send('Nothing Defined')
+    }
 
+app.get('/:cmd?', (req, res) => {
+  console.time("request")
+  const cmd = req.params.cmd
+
+  switch(cmd){
+    
+    case 'cpu':
+      sysinfo.cpu()
+      .then(data => res.send(data))
+      .catch(error => console.error(error));
+    break
+    default:
+      res.send('Nothing Defined')
+    break
+  }
+  console.timeEnd("request")
+});
 
 // Define listener
 app.listen(port, () => { console.log("Listening on port " + port) });
